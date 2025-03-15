@@ -9,6 +9,10 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.content.Context
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Notification
+import androidx.core.app.NotificationCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -48,8 +52,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             val z = it.values[2]
             _sensorValues.value = Triple(x, y, z)
 
+            // Si alguno de los valores supera 9, activar vibración y LED
             if (x > 9.0 || y > 9.0 || z > 9.0) {
-                vibrarCelular(500)
+                vibrarCelular(500) // Vibrar por 500ms
+                encenderLEDNotificacion()
             }
         }
     }
@@ -70,7 +76,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         }
     }
 
-     fun vibrarCelular(milisegundos: Long) {
+    // Función para hacer vibrar el celular
+    private fun vibrarCelular(milisegundos: Long) {
         val vibrator = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             val manager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
             manager.defaultVibrator
@@ -83,6 +90,28 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         } else {
             vibrator.vibrate(milisegundos)
         }
+    }
+
+    // Función para encender el LED de notificación
+    private fun encenderLEDNotificacion() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val channel = NotificationChannel("LED_CHANNEL", "Notificaciones LED", NotificationManager.IMPORTANCE_LOW)
+            channel.enableLights(true)
+            channel.lightColor = android.graphics.Color.RED
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val notification = NotificationCompat.Builder(this, "LED_CHANNEL")
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle("Alerta de acelerómetro")
+            .setContentText("Movimiento fuerte detectado.")
+            .setLights(android.graphics.Color.RED, 1000, 1000) // Encender LED rojo
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build()
+
+        notificationManager.notify(1, notification)
     }
 }
 
@@ -109,5 +138,5 @@ fun UIPrincipal(sensorValues: Triple<Float, Float, Float>) {
 @Preview(showBackground = true)
 @Composable
 fun Previsualizacion() {
-    UIPrincipal(sensorValues = Triple(0f, 0f, 0f))
+    UIPrincipal(sensorValues = Triple(1f, 2f, 3f)) // Valores estáticos para evitar error
 }
