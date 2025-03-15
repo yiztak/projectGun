@@ -5,6 +5,10 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -39,7 +43,14 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
-            _sensorValues.value = Triple(it.values[0], it.values[1], it.values[2])
+            val x = it.values[0]
+            val y = it.values[1]
+            val z = it.values[2]
+            _sensorValues.value = Triple(x, y, z)
+
+            if (x > 9.0 || y > 9.0 || z > 9.0) {
+                vibrarCelular(500)
+            }
         }
     }
 
@@ -58,6 +69,21 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
         }
     }
+
+     fun vibrarCelular(milisegundos: Long) {
+        val vibrator = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            val manager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            manager.defaultVibrator
+        } else {
+            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(milisegundos, VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            vibrator.vibrate(milisegundos)
+        }
+    }
 }
 
 @Composable
@@ -67,7 +93,13 @@ fun UIPrincipal(sensorValues: Triple<Float, Float, Float>) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Acelerómetro:")
+        if(sensorValues.first > 9.0){
+            Text(text = "X más de 9")
+        } else if(sensorValues.second > 9.0){
+            Text(text = "Y más de 9")
+        } else if(sensorValues.third > 9.0){
+            Text(text = "Z más de 9")
+        }
         Text(text = "X: ${sensorValues.first}")
         Text(text = "Y: ${sensorValues.second}")
         Text(text = "Z: ${sensorValues.third}")
