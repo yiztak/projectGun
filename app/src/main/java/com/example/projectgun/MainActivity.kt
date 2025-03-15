@@ -24,6 +24,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     lateinit var sensorManager: SensorManager
     var accelerometer: Sensor? = null
     var _sensorValues = mutableStateOf(Triple(0f, 0f, 0f))
+    var fase=0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
