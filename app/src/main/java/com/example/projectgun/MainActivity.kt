@@ -49,10 +49,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             val z = it.values[2]
             _sensorValues.value = Triple(x, y, z)
 
-            if ((x < 4.0 || x > -4.0) && (y < -7.0) && (z < 4.0 || z > -4.0)) {
+            if ((x < 4.0 || x > -4.0) && (y < -7.0) && (z < 4.0 || z > -4.0)&&fase!=0) {
                 vibrarCelular(500)
                 fase=0
-            }else if((x < 6.0) && (y > -7.0) && (z < 4.0 || z > -4.0)){
+            }else if((x < -4.0) && (y > -9.0) && (z < 4.0 || z > -4.0)&&fase==0){
                 vibrarCelular(500)
                 fase=1
             }
