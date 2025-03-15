@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             if ((x < 4.0 || x > -4.0) && (y < -7.0) && (z < 4.0 || z > -4.0)) {
                 vibrarCelular(500)
                 fase=0
-            }else if((x < 6.0) && (y < -7.0) && (z < 4.0 || z > -4.0)){
+            }else if((x < 6.0) && (y > -7.0) && (z < 4.0 || z > -4.0)){
                 vibrarCelular(500)
                 fase=1
             }
