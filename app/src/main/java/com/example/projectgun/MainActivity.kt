@@ -9,10 +9,6 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.content.Context
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Notification
-import androidx.core.app.NotificationCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -28,7 +24,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     lateinit var sensorManager: SensorManager
     var accelerometer: Sensor? = null
     var _sensorValues = mutableStateOf(Triple(0f, 0f, 0f))
-    private var ledEncendido = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,13 +48,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             val z = it.values[2]
             _sensorValues.value = Triple(x, y, z)
 
-            // Si alguno de los valores supera 9, activar vibración y LED una sola vez
-            if ((x > 9.0 || y > 9.0 || z > 9.0) && !ledEncendido) {
-                vibrarCelular(500) // Vibrar por 500ms
-                encenderLEDNotificacion()
-                ledEncendido = true
-            } else if (x <= 9.0 && y <= 9.0 && z <= 9.0) {
-                ledEncendido = false // Resetear estado cuando vuelvan a valores normales
+            if (x > 9.0 || y > 9.0 || z > 9.0) {
+                vibrarCelular(500)
             }
         }
     }
@@ -80,7 +70,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         }
     }
 
-    // Función para hacer vibrar el celular
     private fun vibrarCelular(milisegundos: Long) {
         val vibrator = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             val manager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
@@ -94,28 +83,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         } else {
             vibrator.vibrate(milisegundos)
         }
-    }
-
-    // Función para encender el LED de notificación
-    private fun encenderLEDNotificacion() {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            val channel = NotificationChannel("LED_CHANNEL", "Notificaciones LED", NotificationManager.IMPORTANCE_LOW)
-            channel.enableLights(true)
-            channel.lightColor = android.graphics.Color.RED
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val notification = NotificationCompat.Builder(this, "LED_CHANNEL")
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("Alerta de acelerómetro")
-            .setContentText("Movimiento fuerte detectado.")
-            .setLights(android.graphics.Color.RED, 1000, 1000) // Encender LED rojo
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .build()
-
-        notificationManager.notify(1, notification)
     }
 }
 
