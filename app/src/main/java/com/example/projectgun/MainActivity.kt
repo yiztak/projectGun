@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
         setContent {
-            UIPrincipal(sensorValues = _sensorValues.value)
+            UIPrincipal(sensorValues = _sensorValues.value,fase)
         }
 
         // Registrar el sensor
@@ -49,9 +49,14 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             val z = it.values[2]
             _sensorValues.value = Triple(x, y, z)
 
-            if (x > 9.0 || y > 9.0 || z > 9.0) {
+            if ((x < 4.0 || x > -4.0) && (y < -7.0) && (z < 4.0 || z > -4.0)) {
                 vibrarCelular(500)
+                fase=0
+            }else if((x < 6.0) && (y < -7.0) && (z < 4.0 || z > -4.0)){
+                vibrarCelular(500)
+                fase=1
             }
+
         }
     }
 
@@ -88,19 +93,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 }
 
 @Composable
-fun UIPrincipal(sensorValues: Triple<Float, Float, Float>) {
+fun UIPrincipal(sensorValues: Triple<Float, Float, Float>,fase:Int) {
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if(sensorValues.first > 9.0){
-            Text(text = "X más de 9")
-        } else if(sensorValues.second > 9.0){
-            Text(text = "Y más de 9")
-        } else if(sensorValues.third > 9.0){
-            Text(text = "Z más de 9")
-        }
+        Text(text = "Fase = $fase")
         Text(text = "X: ${sensorValues.first}")
         Text(text = "Y: ${sensorValues.second}")
         Text(text = "Z: ${sensorValues.third}")
@@ -110,6 +109,6 @@ fun UIPrincipal(sensorValues: Triple<Float, Float, Float>) {
 @Preview(showBackground = true)
 @Composable
 fun Previsualizacion() {
-    UIPrincipal(sensorValues = Triple(0f, 0f, 0f))
+    UIPrincipal(sensorValues = Triple(0f, 0f, 0f),0)
 }
 
