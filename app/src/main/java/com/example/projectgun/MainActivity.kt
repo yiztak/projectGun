@@ -28,6 +28,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     lateinit var sensorManager: SensorManager
     var accelerometer: Sensor? = null
     var _sensorValues = mutableStateOf(Triple(0f, 0f, 0f))
+    private var ledEncendido = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,10 +53,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             val z = it.values[2]
             _sensorValues.value = Triple(x, y, z)
 
-            // Si alguno de los valores supera 9, activar vibración y LED
-            if (x > 9.0 || y > 9.0 || z > 9.0) {
+            // Si alguno de los valores supera 9, activar vibración y LED una sola vez
+            if ((x > 9.0 || y > 9.0 || z > 9.0) && !ledEncendido) {
                 vibrarCelular(500) // Vibrar por 500ms
                 encenderLEDNotificacion()
+                ledEncendido = true
+            } else if (x <= 9.0 && y <= 9.0 && z <= 9.0) {
+                ledEncendido = false // Resetear estado cuando vuelvan a valores normales
             }
         }
     }
@@ -138,5 +142,6 @@ fun UIPrincipal(sensorValues: Triple<Float, Float, Float>) {
 @Preview(showBackground = true)
 @Composable
 fun Previsualizacion() {
-    UIPrincipal(sensorValues = Triple(1f, 2f, 3f)) // Valores estáticos para evitar error
+    UIPrincipal(sensorValues = Triple(0f, 0f, 0f))
 }
+
