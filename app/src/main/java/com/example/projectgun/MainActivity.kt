@@ -9,6 +9,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.content.Context
+import android.media.MediaPlayer
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -44,6 +45,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
+
             val x = it.values[0]
             val y = it.values[1]
             val z = it.values[2]
@@ -51,9 +53,11 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
             if ((x < 4.0 || x > -4.0) && (y < -7.0) && (z < 4.0 || z > -4.0)&&fase!=0) {
                 vibrarCelular(500)
+
                 fase=0
             }else if((x < -4.0) && (y > -9.0) && (z < 4.0 || z > -4.0)&&fase==0){
                 vibrarCelular(500)
+                
                 fase=1
             }
 
