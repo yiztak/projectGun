@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity(), SensorEventListener {
     var backgroundMediaPlayer: MediaPlayer? = null
-
+    var shots = 0
     lateinit var sensorManager: SensorManager
     var accelerometer: Sensor? = null
     var _sensorValues = mutableStateOf(Triple(0f, 0f, 0f))
@@ -63,6 +63,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             if((x>-10||x<10)&&(y>-10||y<10)&&(z>-10||z<10)){
                 if ((x < 2.0 && x > -2.0) && (y < -9.5) && (z < 4.0 && z > -4.0)&&fase==1) {
                     reproducirSonido(this, R.raw.revolver_prepare)
+                    shots = 0
                     fase=0
                     vibrarCelular(500)
                 }else if((x < -2.0) && (y > -9.5) && (z < 4.0 && z > -4.0)&&fase!=1&&fase!=2){
@@ -75,7 +76,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                         delay(300)
                         controlFlash(false)
                     }
-                    reproducirSonido(this, R.raw.revolver_shoot)
+                    if(shots == 6){
+                        reproducirSonido(this, R.raw.no_bullets)
+                    }else{
+                        reproducirSonido(this, R.raw.revolver_shoot)
+                        shots++
+                    }
+
                     vibrarCelular(100)
                     tiempoUltimoDisparo= tiempoActual
                     fase=2
