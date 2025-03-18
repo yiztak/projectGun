@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
         setContent {
-            UIPrincipal(sensorValues = _sensorValues.value,fase)
+            UIPrincipal(sensorValues = _sensorValues.value,fase,shots)
         }
 
         // Registrar el sensor
@@ -60,25 +60,29 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             val y = it.values[1]
             val z = it.values[2]
             _sensorValues.value = Triple(x, y, z)
-            if((x>-10||x<10)&&(y>-10||y<10)&&(z>-10||z<10)){
+            if((x>-10||x<10)&&(y>-10||y<10)){
                 if ((x < 2.0 && x > -2.0) && (y < -9.5) && (z < 4.0 && z > -4.0)&&fase==1) {
+                    //Enfundar
                     reproducirSonido(this, R.raw.revolver_prepare)
-                    shots = 0
                     fase=0
                     vibrarCelular(500)
                 }else if((x < -2.0) && (y > -9.5) && (z < 4.0 && z > -4.0)&&fase!=1&&fase!=2){
+                    //Apuntar
                     reproducirSonido(this,R.raw.spining)
                     fase=1
                     vibrarCelular(500)
-                }else if(fase==1 &&(y-yAnterior>2&&(tiempoActual-tiempoUltimoDisparo>500))&&(y>2)&&fase==1){
+                }else if(fase==1 &&(y-yAnterior>2&&(tiempoActual-tiempoUltimoDisparo>500))&&(y>2)&&fase==1&&(z < 8.0 && z > -8.0)){
+                    //Disparar
                     controlFlash(true)
                     CoroutineScope(Dispatchers.Main).launch{
                         delay(300)
                         controlFlash(false)
                     }
                     if(shots == 6){
+                        //Sin balas
                         reproducirSonido(this, R.raw.no_bullets)
                     }else{
+                        //Con balas
                         reproducirSonido(this, R.raw.revolver_shoot)
                         shots++
                     }
@@ -88,6 +92,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     fase=2
                 }else if (fase == 2 && y > -9.5) {
                     fase = 1
+                }else if(fase==1&&(z<-15)){
+                    shots=0
+                    reproducirSonido(this,R.raw.spining)
                 }
                 yAnterior=y
 
@@ -125,6 +132,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     override fun onPause() {
         super.onPause()
         sensorManager.unregisterListener(this)
+        detenerMusicaDeFondo()
     }
 
     override fun onResume() {
@@ -132,6 +140,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         accelerometer?.let {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
         }
+        iniciarMusicaDeFondo(this, R.raw.fondo)
     }
 
     override fun onDestroy() {
@@ -163,7 +172,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 }
 
 @Composable
-fun UIPrincipal(sensorValues: Triple<Float, Float, Float>,fase:Int) {
+fun UIPrincipal(sensorValues: Triple<Float, Float, Float>,fase:Int,shots:Int) {
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.Center,
@@ -179,6 +188,6 @@ fun UIPrincipal(sensorValues: Triple<Float, Float, Float>,fase:Int) {
 @Preview(showBackground = true)
 @Composable
 fun Previsualizacion() {
-    UIPrincipal(sensorValues = Triple(0f, 0f, 0f),0)
+    UIPrincipal(sensorValues = Triple(0f, 0f, 0f),0,6)
 }
 
