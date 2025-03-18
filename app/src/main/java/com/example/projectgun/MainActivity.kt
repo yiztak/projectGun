@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity(), SensorEventListener {
+    var backgroundMediaPlayer: MediaPlayer? = null
 
     lateinit var sensorManager: SensorManager
     var accelerometer: Sensor? = null
@@ -28,6 +29,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     var fase=0
     var yAnterior=0f
     var tiempoUltimoDisparo=System.currentTimeMillis()
+    private var mediaPlayer: MediaPlayer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +45,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         accelerometer?.let {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
         }
+        iniciarMusicaDeFondo(this, R.raw.fondo)
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
@@ -57,11 +60,12 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     vibrarCelular(500)
 
                     fase=0
+                    reproducirSonido(this, R.raw.revolver_prepare)
                 }else if((x < -2.0) && (y > -9.5) && (z < 4.0 && z > -4.0)&&fase!=1&&fase!=2){
                     vibrarCelular(500)
                     fase=1
-
-                }else if(fase==1 &&(y-yAnterior>1&&(tiempoActual-tiempoUltimoDisparo>500))&&(y>2)&&fase==1){
+                    reproducirSonido(this,R.raw.spining)
+                }else if(fase==1 &&(y-yAnterior>2&&(tiempoActual-tiempoUltimoDisparo>500))&&(y>2)&&fase==1){
                     vibrarCelular(100)
                     tiempoUltimoDisparo= tiempoActual
                     reproducirSonido(this, R.raw.revolver_shoot)
@@ -77,13 +81,26 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     }
 
-    private var mediaPlayer: MediaPlayer? = null
 
     fun reproducirSonido(context: Context, sonidoResId: Int) {
         mediaPlayer?.release()
         mediaPlayer = MediaPlayer.create(context, sonidoResId)
         mediaPlayer?.start()
     }
+
+    private fun iniciarMusicaDeFondo(context: Context, musicaResId: Int) {
+        backgroundMediaPlayer = MediaPlayer.create(context, musicaResId).apply {
+            isLooping = true
+            start()
+        }
+    }
+
+    private fun detenerMusicaDeFondo() {
+        backgroundMediaPlayer?.release()
+        backgroundMediaPlayer = null
+    }
+
+
 
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -101,6 +118,12 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        detenerMusicaDeFondo()
+    }
+
 
     private fun vibrarCelular(milisegundos: Long) {
         val vibrator = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
