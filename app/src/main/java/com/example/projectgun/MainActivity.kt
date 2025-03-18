@@ -10,14 +10,19 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.content.Context
 import android.hardware.camera2.CameraManager
+import android.media.Image
 import android.media.MediaPlayer
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
@@ -27,16 +32,16 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity(), SensorEventListener {
     var backgroundMediaPlayer: MediaPlayer? = null
-    var shots = 0
     lateinit var sensorManager: SensorManager
     var accelerometer: Sensor? = null
     var _sensorValues = mutableStateOf(Triple(0f, 0f, 0f))
-    var fase=0
     var yAnterior=0f
     var zAnterior=0f
     var tiempoUltimoDisparo=System.currentTimeMillis()
     var tiempoUltimaRecarga=System.currentTimeMillis()
     private var mediaPlayer: MediaPlayer? = null
+    var fase by mutableStateOf(0)
+    var shots by mutableStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +50,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
         setContent {
-            UIPrincipal(sensorValues = _sensorValues.value,fase,shots)
+            UIPrincipal(sensorValues = _sensorValues.value,fase = fase,shots = shots)
         }
 
         // Registrar el sensor
@@ -184,16 +189,34 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
 @Composable
 fun UIPrincipal(sensorValues: Triple<Float, Float, Float>,fase:Int,shots:Int) {
+    val currentImage = when (fase) {
+        0 -> R.drawable.fundada
+        1 -> R.drawable.normal
+        2 -> R.drawable.disparando
+        3 -> R.drawable.recarga
+        else -> R.drawable.normal
+    }
+    Image(
+        painter = painterResource(id = currentImage),
+        contentDescription = null,
+        modifier = Modifier.fillMaxWidth().fillMaxHeight().graphicsLayer(
+            rotationZ = 270f
+        ),
+    )
+
+    /*
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Text(text = "Fase = $fase")
+        Text(text = "Shots = $shots")
         Text(text = "X: ${sensorValues.first}")
         Text(text = "Y: ${sensorValues.second}")
         Text(text = "Z: ${sensorValues.third}")
-    }
+    } */
 }
 
 @Preview(showBackground = true)
