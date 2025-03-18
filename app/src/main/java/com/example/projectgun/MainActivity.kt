@@ -30,6 +30,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+
+
+
 class MainActivity : ComponentActivity(), SensorEventListener {
     var backgroundMediaPlayer: MediaPlayer? = null
     lateinit var sensorManager: SensorManager
