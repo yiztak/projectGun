@@ -33,7 +33,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     var _sensorValues = mutableStateOf(Triple(0f, 0f, 0f))
     var fase=0
     var yAnterior=0f
+    var zAnterior=0f
     var tiempoUltimoDisparo=System.currentTimeMillis()
+    var tiempoUltimaRecarga=System.currentTimeMillis()
     private var mediaPlayer: MediaPlayer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,10 +70,11 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     vibrarCelular(500)
                 }else if((x < -2.0) && (y > -9.5) && (z < 4.0 && z > -4.0)&&fase!=1&&fase!=2){
                     //Apuntar
-                    reproducirSonido(this,R.raw.spining)
+                    //reproducirSonido(this,R.raw.spining)
                     fase=1
                     vibrarCelular(500)
-                }else if(fase==1 &&(y-yAnterior>2&&(tiempoActual-tiempoUltimoDisparo>500))&&(y>2)&&fase==1&&(z < 8.0 && z > -8.0)){
+                }else if(fase==1 &&(y-yAnterior>2&&(tiempoActual-tiempoUltimoDisparo>500))
+                    &&(y>2)&&(z < 8.0 && z > -8.0)){
                     //Disparar
                     controlFlash(true)
                     CoroutineScope(Dispatchers.Main).launch{
@@ -91,12 +94,20 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     tiempoUltimoDisparo= tiempoActual
                     fase=2
                 }else if (fase == 2 && y > -9.5) {
+                    //Apuntado despues del disparo
                     fase = 1
-                }else if(fase==1&&(z<-15)){
+                    //}else if(fase==1&&(z<-15)){
+                }else if(fase==1 &&(z-zAnterior>1&&(tiempoActual-tiempoUltimaRecarga>500))
+                        &&(z>8)&&(y < 4.0 && y > -4.0)&&(tiempoActual-tiempoUltimoDisparo>500)&&
+                (x>-8)){
+                    //Spining
                     shots=0
                     reproducirSonido(this,R.raw.spining)
+                    vibrarCelular(100)
+                    tiempoUltimaRecarga= tiempoActual
                 }
                 yAnterior=y
+                zAnterior=z
 
             }
         }
