@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -236,15 +237,34 @@ fun UIPrincipal(sensorValues: Triple<Float, Float, Float>, fase:Int ,shots:Int) 
             R.drawable.normal
         }
     }
-    Image(
-        painter = painterResource(id = currentImage),
-        contentDescription = null,
-        modifier = Modifier.fillMaxWidth().fillMaxHeight().graphicsLayer(
-            rotationZ = 270f,
-            rotationY = currentPositionY
 
-        ),
-    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.el_bueno),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer(rotationZ = 270f, scaleX = 2.2f, scaleY = 2.2f)
+        )
+        Image(
+            painter = painterResource(id = currentImage),
+            contentDescription = null,
+            contentScale = ContentScale.Fit, // Escalar la imagen para que llene la pantalla
+            modifier = Modifier
+                .width(250.dp)
+                .height(250.dp)
+                .graphicsLayer(rotationZ = 270f, scaleX = 2f, scaleY = 2f)
+            //.border(2.dp, Color.Red)
+        )
+    }
+
 
 
 
