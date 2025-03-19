@@ -132,6 +132,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                 (x>-8)){
                     //Spining
                     shots=0
+                    fase = 3
                     reproducirSonido(this,R.raw.spining)
                     vibrarCelular(100)
                     tiempoUltimaRecarga= tiempoActual
@@ -347,7 +348,6 @@ fun Pantalla3(navController: NavController,  fase: Int, shots: Int) { //Diestro
                 R.drawable.normal
             }
         }
-
         fase == 3 ->{
             R.drawable.recarga
         }
