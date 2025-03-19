@@ -76,24 +76,29 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     reproducirSonido(this, R.raw.revolver_prepare)
                     fase=0
                     vibrarCelular(500)
-                }else if((x < -2.0) && (y > -9.5) && (z < 4.0 && z > -4.0)&&fase!=1&&fase!=2){
+                }else if((x < -2.0 || x > 2.0) && (y > -9.5) && (z < 4.0 && z > -4.0)&&fase!=1&&fase!=2){
                     //Apuntar
-                    //reproducirSonido(this,R.raw.spining)
+                    reproducirSonido(this,R.raw.gun_drawing)
                     fase=1
                     vibrarCelular(500)
                 }else if(fase==1 &&(y-yAnterior>2&&(tiempoActual-tiempoUltimoDisparo>500))
-                    &&(y>2)&&(z < 8.0 && z > -8.0)){
+                    &&(y>2)&&(z < 4.0 && z > -4.0)){
                     //Disparar
-                    controlFlash(true)
-                    CoroutineScope(Dispatchers.Main).launch{
-                        delay(300)
-                        controlFlash(false)
-                    }
-                    if(shots == 6){
+
+                    if(shots >= 6){
                         //Sin balas
+                        CoroutineScope(Dispatchers.Main).launch{
+                            delay(300)
+                        }
                         reproducirSonido(this, R.raw.no_bullets)
+                        shots++
                     }else{
                         //Con balas
+                        controlFlash(true)
+                        CoroutineScope(Dispatchers.Main).launch{
+                            delay(300)
+                            controlFlash(false)
+                        }
                         reproducirSonido(this, R.raw.revolver_shoot)
                         shots++
                     }
@@ -191,21 +196,57 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 }
 
 @Composable
-fun UIPrincipal(sensorValues: Triple<Float, Float, Float>,fase:Int,shots:Int) {
-    val currentImage = when (fase) {
-        0 -> R.drawable.fundada
-        1 -> R.drawable.normal
-        2 -> R.drawable.disparando
-        3 -> R.drawable.recarga
-        else -> R.drawable.normal
+fun UIPrincipal(sensorValues: Triple<Float, Float, Float>, fase:Int ,shots:Int) {
+    val x = sensorValues.first
+    val y = sensorValues.second
+    val z = sensorValues.third
+    var deltaX by remember { mutableStateOf(0f) }
+    var currentPositionY : Float = 0f
+
+
+    if(x < 0 && deltaX - x  < 0){
+        currentPositionY = 0f
+    }
+    else if(x > 0 || deltaX - x  > 0){
+        currentPositionY = 540f
+    }
+    deltaX = x
+
+
+    val currentImage = when  {
+        fase == 0 -> {
+            R.drawable.fundada
+        }
+        fase == 1 -> {
+            R.drawable.normal
+        }
+        fase == 2 ->{
+            if(shots <= 6 ) {           //This allow us to detect whether there are bullets or not
+                R.drawable.disparando
+            }
+            else {
+                R.drawable.normal
+            }
+        }
+
+        fase == 3 ->{
+            R.drawable.recarga
+        }
+        else -> {
+            R.drawable.normal
+        }
     }
     Image(
         painter = painterResource(id = currentImage),
         contentDescription = null,
         modifier = Modifier.fillMaxWidth().fillMaxHeight().graphicsLayer(
-            rotationZ = 270f
+            rotationZ = 270f,
+            rotationY = currentPositionY
+
         ),
     )
+
+
 
     /*
     Column(
