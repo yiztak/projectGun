@@ -200,17 +200,17 @@ fun UIPrincipal(sensorValues: Triple<Float, Float, Float>, fase:Int ,shots:Int) 
     val x = sensorValues.first
     val y = sensorValues.second
     val z = sensorValues.third
-    var deltaX by remember { mutableStateOf(0f) }
+
     var currentPositionY : Float = 0f
 
 
-    if(x < 0 && deltaX - x  < 0){
+    if(x < 0 ){
         currentPositionY = 0f
     }
-    else if(x > 0 || deltaX - x  > 0){
+    else if(x > 0 ){
         currentPositionY = 540f
     }
-    deltaX = x
+
 
 
     val currentImage = when  {
